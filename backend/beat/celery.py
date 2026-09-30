@@ -3,11 +3,10 @@
 We use Celery Beat as a scheduler to run tasks in pre-configured intervals.
 """
 
-from celery import Celery, signature
-from celery.schedules import crontab
-
 from backend.config import CeleryConfig
 from backend.worker.task_index import Tasks
+from celery import Celery, signature
+from celery.schedules import crontab
 
 app = Celery()
 app.config_from_object(CeleryConfig)

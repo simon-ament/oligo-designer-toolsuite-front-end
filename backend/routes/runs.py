@@ -19,8 +19,9 @@ from http import HTTPStatus
 from typing import Any
 
 from bson import ObjectId
-from flask import Blueprint, abort, current_app, jsonify, send_file, session
+from flask import Blueprint, abort, current_app, jsonify, request, send_file, session
 from flask_login import current_user
+from gene_viewer import GeneViewerServer
 
 from backend.extensions import db
 from backend.routes.route_helpers import (
@@ -229,3 +230,14 @@ def get_run_status(run_id: ObjectId):
     run = get_run_or_404(run_id)
 
     return jsonify({"state": run["status"]}), HTTPStatus.OK
+
+
+@runs_bp.route("/api/runs/visualizations", methods=["GET"])
+def get_visualizations():
+    gene_viewer_server = GeneViewerServer(current_app.config["VISUALIZATION_PATH"])
+    viewer_id = request.args.get("viewer_id", "", type=str)
+    gene_id = request.args.get("gene_id", "", type=str)
+    visualization_data = gene_viewer_server.serve(viewer_id, gene_id)
+    if visualization_data.get("error"):
+        return {"error": visualization_data["error"]}, 400
+    return visualization_data

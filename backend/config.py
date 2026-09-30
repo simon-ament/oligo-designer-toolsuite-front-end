@@ -45,6 +45,7 @@ class Config:
     RELATIVE_DATA_ACCESS_PATH = "data-access"  # Shared between server and worker
     RELATIVE_UPLOAD_PATH = "uploads"  # Relative to data access path
     RELATIVE_USERDATA_PATH = "user_data"  # Relative to data access path
+    RELATIVE_VISUALIZATION_PATH = "visualization"  # Relative to data access path
 
     # Session settings
     PERMANENT_SESSION_LIFETIME = timedelta(days=90)

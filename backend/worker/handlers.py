@@ -12,6 +12,7 @@ from celery.exceptions import TaskRevokedError
 from backend.types import RunStatus
 from backend.worker.celery import logger
 from backend.worker.database import _update_run_by_task_id, start_pending_run
+from backend.worker.visualization import _create_visualization
 
 
 class PipelineTask(Task):
@@ -45,6 +46,7 @@ class PipelineTask(Task):
         """
         self._log_handler_call("on_success", task_id)
         super().on_success(retval, task_id, args, kwargs)
+        _create_visualization(self, run_id=task_id, form_data=args[2], output_path=args[3])
         _update_run_by_task_id(task_id, {"status": RunStatus.SUCCESS})
 
     def on_failure(

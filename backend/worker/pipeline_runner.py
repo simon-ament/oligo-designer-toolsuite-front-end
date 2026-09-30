@@ -13,7 +13,6 @@ from pydantic import ValidationError
 
 from backend.constants import PIPELINE_FILE_INPUT, PIPELINE_MODELS
 from backend.exceptions import ODTEmptyResultError, ODTPipelineError
-from backend.worker.genomic_regions_file import GenomicRegionsFile
 from backend.worker.utils import build_fallback_error_message
 
 
@@ -69,9 +68,6 @@ class PipelineRunner:
         try:
             # Pipeline Execution
             self.execute_pipeline(config_path)
-
-            # Generate Visualization Files
-            self.generate_genomic_regions_file(form_data, output_path)
         finally:
             # Cleanup of Temporary Files
             self.cleanup_temp_files(form_data, config_path)
@@ -213,45 +209,6 @@ class PipelineRunner:
                 self.logger.debug(f"STDOUT: {error.stdout}")
             self.logger.debug(f"PLAIN: {error}")
             raise ODTPipelineError(fallback_error_message)
-
-    def generate_genomic_regions_file(self, form_data: dict, output_path: str) -> None:
-        """Generates the Genomic Regions file used for visualizing the result.
-
-        Arguments:
-            form_data {dict} -- The pipeline configuration.
-            output_path {str} -- The path where all output of the pipeline should be written.
-        """
-        # find files_fasta_target_probe_database fasta file and read it
-        regions_file = glom(form_data, "target_probe.oligo_generation.file_region_ids")
-
-        fasta_paths = glom(form_data, "target_probe.oligo_generation.files_fasta_probe_database")
-        if not fasta_paths:
-            self.logger.debug("No fasta files provided, skipping visualization generation.")
-            return
-
-        # find output file name containing "probes" or "probeset"
-        output_yaml = next(
-            (
-                fname
-                for fname in os.listdir(output_path)
-                if ("probes" in fname or "probeset" in fname)
-                and "order" not in fname
-                and (fname.endswith(".yml") or fname.endswith(".yaml"))
-            ),
-            None,
-        )
-        if not output_yaml:
-            self.logger.debug(
-                "No output YAML file containing 'probes' or 'probeset' found, skipping visualization generation."
-            )
-            return
-        probes_path = os.path.join(output_path, output_yaml)
-
-        regions_file = GenomicRegionsFile(
-            regions_file, fasta_paths, probes_path, self.pipeline_name, logger=self.logger
-        )
-        regions_file_path: str = os.path.join(output_path, "genomic_regions.yaml")
-        regions_file.yaml_dump(regions_file_path)
 
     def cleanup_temp_files(self, form_data: dict, config_path: str) -> None:
         """Deletes all temporary files necessary for the pipeline run.

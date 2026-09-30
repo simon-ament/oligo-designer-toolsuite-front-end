@@ -606,6 +606,10 @@ form.rjsf {
     border-radius: $border-radius;
     padding: 1.5rem;
     background-color: $primary-bg-subtle;
+
+    gene-viewer {
+        --gene-viewer-background-color: var(--#{$prefix}primary-bg-subtle);
+    }
 }
 
 .text-muted {

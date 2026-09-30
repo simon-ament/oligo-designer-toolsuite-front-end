@@ -65,7 +65,11 @@ def prepare_paths(app: Flask):
     All other relative paths are relative to this directory.
     """
     relative_data_access_path_key = "RELATIVE_DATA_ACCESS_PATH"
-    relative_to_data_access_keys = ["RELATIVE_UPLOAD_PATH", "RELATIVE_USERDATA_PATH"]
+    relative_to_data_access_keys = [
+        "RELATIVE_UPLOAD_PATH",
+        "RELATIVE_USERDATA_PATH",
+        "RELATIVE_VISUALIZATION_PATH",
+    ]
 
     def _update_and_mkdir(relative_key: str, path: str):
         key = relative_key.split("RELATIVE_", maxsplit=1)[1]

@@ -289,38 +289,13 @@ const pollRunState = async (page: Page, runId: string, timeoutMs: number) => {
     });
 };
 
-/**
- * Run status flips to "success" before its output artifacts are
- * necessarily written to disk, so this is polled separately.
- */
-const pollGenomicRegionsFile = async (
-    page: Page,
-    runId: string,
-    timeoutMs: number
-): Promise<boolean> => {
-    return pollUntil({
-        condition: async () => {
-            const res = await backendGetOk(
-                page,
-                `/api/runs/${runId}/files/genomic_regions.yaml`
-            );
-            return res.ok();
-        },
-        timeoutMs,
-        intervalMs: POLL_INTERVAL_MS,
-        timeoutMessage: `Timed out waiting for run ${runId} to expose genomic and config artifacts.`,
-    });
-};
-
 /** Also waits for the genomic regions artifact to be downloadable — a `success` state alone doesn't guarantee it's ready. */
 export const waitForSuccessfulRun = async (
     page: Page,
     runId: string,
     timeoutMs: number = RUN_TIMEOUT_MS
 ) => {
-    const deadline = Date.now() + timeoutMs;
     await pollRunState(page, runId, timeoutMs);
-    return pollGenomicRegionsFile(page, runId, deadline - Date.now());
 };
 
 export const submitAndVerifyRun = async (page: Page) => {
